@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/retry-pillole",
-      "schedule": "* * * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }

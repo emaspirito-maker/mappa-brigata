@@ -18,6 +18,7 @@ export async function GET(_req: NextRequest) {
   }
 
   return NextResponse.json({
+    submissionId: submission.id,
     status: submission.status,
     attemptCount: submission.attemptCount,
   });
