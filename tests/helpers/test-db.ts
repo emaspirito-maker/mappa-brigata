@@ -1,6 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import * as schema from "@/lib/db/schema";
+import type { Db } from "@/lib/db/client";
 
 export async function createTestDb() {
   const client = new PGlite();
@@ -29,4 +30,4 @@ export async function createTestDb() {
   return db;
 }
 
-export type TestDb = Awaited<ReturnType<typeof createTestDb>>;
+export type TestDb = Db;
