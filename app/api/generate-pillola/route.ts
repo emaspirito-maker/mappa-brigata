@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import { createDb } from "@/lib/db/client";
 import { generatePillola } from "@/lib/ai/generate";
 
@@ -10,10 +10,10 @@ export async function POST(req: NextRequest) {
   }
 
   const db = createDb(process.env.DATABASE_URL!);
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+  const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
   // Not awaited: the client polls /api/submission-status for the result.
-  generatePillola(db, anthropic, submissionId).catch((err) => {
+  generatePillola(db, gemini, submissionId).catch((err) => {
     console.error("generatePillola failed unexpectedly", err);
   });
 

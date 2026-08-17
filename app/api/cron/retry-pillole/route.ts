@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import { createDb } from "@/lib/db/client";
 import { getFailedForRetry } from "@/lib/db/queries";
 import { generatePillola } from "@/lib/ai/generate";
@@ -13,11 +13,11 @@ export async function GET(req: NextRequest) {
   }
 
   const db = createDb(process.env.DATABASE_URL!);
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+  const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
   const pending = await getFailedForRetry(db, MAX_ATTEMPTS);
   const results = await Promise.allSettled(
-    pending.map((s) => generatePillola(db, anthropic, s.id))
+    pending.map((s) => generatePillola(db, gemini, s.id))
   );
 
   return NextResponse.json({

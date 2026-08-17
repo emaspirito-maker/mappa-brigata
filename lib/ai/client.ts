@@ -1,19 +1,21 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import type { GoogleGenAI } from "@google/genai";
 
-export async function callClaude(
-  client: Anthropic,
+export async function generateReflection(
+  client: GoogleGenAI,
   prompt: { system: string; user: string }
 ): Promise<string> {
-  const response = await client.messages.create({
-    model: "claude-sonnet-5",
-    max_tokens: 300,
-    system: prompt.system,
-    messages: [{ role: "user", content: prompt.user }],
+  const response = await client.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt.user,
+    config: {
+      systemInstruction: prompt.system,
+      maxOutputTokens: 300,
+    },
   });
 
-  const block = response.content.find((b) => b.type === "text");
-  if (!block || block.type !== "text") {
-    throw new Error("No text content returned by Claude");
+  const text = response.text;
+  if (!text) {
+    throw new Error("No text content returned by Gemini");
   }
-  return block.text.trim();
+  return text.trim();
 }

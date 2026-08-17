@@ -1,8 +1,8 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import type { GoogleGenAI } from "@google/genai";
 import type { Db } from "@/lib/db/client";
 import { getById, markProcessing, markDone, markFailed } from "@/lib/db/queries";
 import { buildPrompt } from "./prompt";
-import { callClaude } from "./client";
+import { generateReflection } from "./client";
 
 const CALL_TIMEOUT_MS = 10_000;
 
@@ -17,7 +17,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 
 export async function generatePillola(
   db: Db,
-  aiClient: Anthropic,
+  aiClient: GoogleGenAI,
   submissionId: string
 ): Promise<{ ok: true; pillola: string } | { ok: false }> {
   const submission = await getById(db, submissionId);
@@ -40,7 +40,7 @@ export async function generatePillola(
 
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const pillola = await withTimeout(callClaude(aiClient, prompt), CALL_TIMEOUT_MS);
+      const pillola = await withTimeout(generateReflection(aiClient, prompt), CALL_TIMEOUT_MS);
       await markDone(db, submissionId, pillola);
       return { ok: true, pillola };
     } catch {

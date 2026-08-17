@@ -24,7 +24,7 @@ async function seedSubmission(sessionId: string) {
 describe("generatePillola", () => {
   it("marks the submission done with the generated text on success", async () => {
     const submission = await seedSubmission("sess-ok");
-    vi.spyOn(clientModule, "callClaude").mockResolvedValue("Ecco la tua riflessione.");
+    vi.spyOn(clientModule, "generateReflection").mockResolvedValue("Ecco la tua riflessione.");
 
     const result = await generatePillola(db, {} as any, submission.id);
 
@@ -36,19 +36,19 @@ describe("generatePillola", () => {
 
   it("retries once on failure, then succeeds on the second attempt", async () => {
     const submission = await seedSubmission("sess-retry");
-    vi.spyOn(clientModule, "callClaude")
+    vi.spyOn(clientModule, "generateReflection")
       .mockRejectedValueOnce(new Error("timeout"))
       .mockResolvedValueOnce("Seconda prova riuscita.");
 
     const result = await generatePillola(db, {} as any, submission.id);
 
     expect(result).toEqual({ ok: true, pillola: "Seconda prova riuscita." });
-    expect(clientModule.callClaude).toHaveBeenCalledTimes(2);
+    expect(clientModule.generateReflection).toHaveBeenCalledTimes(2);
   });
 
   it("marks the submission failed after two consecutive failures", async () => {
     const submission = await seedSubmission("sess-fail");
-    vi.spyOn(clientModule, "callClaude").mockRejectedValue(new Error("down"));
+    vi.spyOn(clientModule, "generateReflection").mockRejectedValue(new Error("down"));
 
     const result = await generatePillola(db, {} as any, submission.id);
 

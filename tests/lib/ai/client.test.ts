@@ -1,33 +1,33 @@
 import { describe, it, expect, vi } from "vitest";
-import { callClaude } from "@/lib/ai/client";
+import { generateReflection } from "@/lib/ai/client";
 
-function fakeAnthropicClient(response: unknown) {
+function fakeGeminiClient(response: unknown) {
   return {
-    messages: {
-      create: vi.fn().mockResolvedValue(response),
+    models: {
+      generateContent: vi.fn().mockResolvedValue(response),
     },
   } as any;
 }
 
-describe("callClaude", () => {
-  it("returns the text from the first content block", async () => {
-    const client = fakeAnthropicClient({
-      content: [{ type: "text", text: "La tua riflessione." }],
-    });
-    const result = await callClaude(client, { system: "sys", user: "usr" });
+describe("generateReflection", () => {
+  it("returns the text from the response", async () => {
+    const client = fakeGeminiClient({ text: "La tua riflessione." });
+    const result = await generateReflection(client, { system: "sys", user: "usr" });
     expect(result).toBe("La tua riflessione.");
-    expect(client.messages.create).toHaveBeenCalledWith(
+    expect(client.models.generateContent).toHaveBeenCalledWith(
       expect.objectContaining({
-        system: "sys",
-        messages: [{ role: "user", content: "usr" }],
+        contents: "usr",
+        config: expect.objectContaining({ systemInstruction: "sys" }),
       })
     );
   });
 
   it("propagates errors from the SDK call", async () => {
     const client = {
-      messages: { create: vi.fn().mockRejectedValue(new Error("network fail")) },
+      models: { generateContent: vi.fn().mockRejectedValue(new Error("network fail")) },
     } as any;
-    await expect(callClaude(client, { system: "sys", user: "usr" })).rejects.toThrow("network fail");
+    await expect(
+      generateReflection(client, { system: "sys", user: "usr" })
+    ).rejects.toThrow("network fail");
   });
 });
